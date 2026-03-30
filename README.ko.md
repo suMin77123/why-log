@@ -40,15 +40,15 @@ Decision logged: docs/decisions/2026-03-30-auth-strategy-jwt.md
 
 **3. 커밋** — AI가 코드와 함께 `docs/decisions/*.md`를 자동으로 스테이징합니다. 결정 로그와 코드가 같은 커밋에 포함됩니다.
 
-**4. PR 생성** — AI가 PR을 만들 때 브랜치의 결정 로그를 자동 수집하여 PR 본문에 **Decision Log** 섹션을 포함합니다:
+**4. PR 생성** — AI가 PR을 만들 때 브랜치의 결정 로그를 자동 수집하여 PR 본문에 **Why Log** 섹션을 포함합니다:
 
 ```markdown
-## Decision Log
+## Why Log
 
-### 인증 전략: JWT
-- **Decision:** 무상태 서비스 간 인증을 위해 JWT 토큰 사용
-- **Reasoning:** 마이크로서비스 간 공유 세션 저장소 불필요
-- **File:** `docs/decisions/2026-03-30-auth-strategy-jwt.md`
+- **인증 전략: JWT**: JWT 토큰 사용 — 무상태 서비스 간 인증, 공유 세션 저장소 불필요
+  → [`docs/decisions/2026-03-30-auth-strategy-jwt.md`](docs/decisions/2026-03-30-auth-strategy-jwt.md)
+
+> Full reasoning and alternatives in each linked decision log.
 ```
 
 ### 수동 (백업용)
@@ -131,7 +131,7 @@ JWT는 공유 세션 저장소 없이 마이크로서비스 간 무상태 검증
    -> 결정 로그가 같은 커밋에 포함
 
 6. PR 생성
-   -> AI가 PR 본문에 Decision Log 섹션 자동 포함
+   -> AI가 PR 본문에 Why Log 섹션 자동 포함
    -> 리뷰어가 HOW를 보기 전에 WHY를 이해
 ```
 
