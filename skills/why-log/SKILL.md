@@ -173,9 +173,9 @@ When creating a pull request with `gh pr create`, **automatically** include deci
    ```bash
    git diff --name-only $(git merge-base HEAD main)..HEAD -- docs/decisions/
    ```
-2. **If decision logs exist**, read each file and append a `## Decision Log` section to the PR body with a **compact bullet list** (not full details):
+2. **If decision logs exist**, read each file and append a `## Why Log` section to the PR body with a **compact bullet list** (not full details):
    ```markdown
-   ## Decision Log
+   ## Why Log
 
    - **[Decision Title]**: [1-sentence decision summary]
      → [`docs/decisions/YYYY-MM-DD-topic.md`](docs/decisions/YYYY-MM-DD-topic.md)

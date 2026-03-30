@@ -32,7 +32,7 @@ Find all `docs/decisions/*.md` files added or modified in this branch compared t
 git diff --name-only ${BASE_BRANCH}...HEAD -- docs/decisions/
 ```
 
-If no decision log files are found, skip to Step 4 and create the PR without a Decision Log section.
+If no decision log files are found, skip to Step 4 and create the PR without a Why Log section.
 
 ### Step 3: Build Decision Summary
 
@@ -60,7 +60,7 @@ For each decision log file found:
    ## Summary
    [Brief description of the changes in this PR, derived from commit messages]
 
-   ## Decision Log
+   ## Why Log
    [For each decision found:]
    - **[Decision Title]**: [1-line decision summary]
      → [`docs/decisions/YYYY-MM-DD-<topic>.md`](docs/decisions/YYYY-MM-DD-<topic>.md)
@@ -103,5 +103,5 @@ Included [N] decision log(s) in the PR description.
 - Always push the current branch before creating the PR
 - The base branch defaults to `main` but can be overridden via arguments
 - Keep the PR title under 70 characters
-- The Decision Log section goes between Summary and Test Plan for visibility
+- The Why Log section goes between Summary and Test Plan for visibility
 - If `gh` CLI is not available or not authenticated, inform the user and provide the PR body text so they can create it manually

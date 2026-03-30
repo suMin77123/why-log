@@ -42,15 +42,15 @@ Trigger signals:
 
 **3. Commit** — The AI automatically stages `docs/decisions/*.md` alongside code changes. Decision logs ship in the same commit as the code they document.
 
-**4. PR Creation** — When the AI creates a PR, it automatically collects decision logs from the branch and includes a **Decision Log** section in the PR body:
+**4. PR Creation** — When the AI creates a PR, it automatically collects decision logs from the branch and includes a **Why Log** section in the PR body:
 
 ```markdown
-## Decision Log
+## Why Log
 
-### Auth Strategy: JWT
-- **Decision:** Use JWT tokens for stateless cross-service auth
-- **Reasoning:** No shared session store needed across microservices
-- **File:** `docs/decisions/2026-03-30-auth-strategy-jwt.md`
+- **Auth Strategy: JWT**: Use JWT tokens — stateless cross-service auth, no shared session store
+  → [`docs/decisions/2026-03-30-auth-strategy-jwt.md`](docs/decisions/2026-03-30-auth-strategy-jwt.md)
+
+> Full reasoning and alternatives in each linked decision log.
 ```
 
 ### Manual (Backup)
@@ -134,7 +134,7 @@ The skill only logs decisions that meet ALL criteria:
    -> Decision log included in same commit
 
 6. Create PR
-   -> AI auto-includes Decision Log section in PR body
+   -> AI auto-includes Why Log section in PR body
    -> Reviewer sees WHY before reviewing HOW
 ```
 
