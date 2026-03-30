@@ -1,13 +1,13 @@
 {
-  "name": "claude-decision-log",
+  "name": "why-log",
   "version": "1.0.0",
   "description": "Claude Code plugin for recording AI decision-making alongside code changes",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/suMin77123/pr-decision-bridge.git"
+    "url": "https://github.com/suMin77123/why-log.git"
   },
-  "homepage": "https://github.com/suMin77123/pr-decision-bridge",
+  "homepage": "https://github.com/suMin77123/why-log",
   "files": [
     ".claude-plugin/",
     "skills/",
