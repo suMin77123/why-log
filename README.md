@@ -15,6 +15,7 @@ AI-assisted code changes lose their reasoning context. PR reviewers see **what**
 | **Claude Code** | `claude plugin add github:suMin77123/why-log` |
 | **Cursor** | Install via Cursor Marketplace or clone to `.cursor-plugin/` |
 | **Codex** | See [Codex installation guide](.codex/INSTALL.md) |
+| **Gemini CLI** | `gemini extensions install github:suMin77123/why-log` |
 
 ## How It Works
 
@@ -155,7 +156,7 @@ chmod +x .git/hooks/pre-commit
 
 - Works alongside the [superpowers](https://github.com/obra/superpowers) plugin
 - Integrates with brainstorming, plan mode, and TDD workflows
-- Cross-platform: Claude Code, Cursor, Codex
+- Cross-platform: Claude Code, Cursor, Codex, Gemini CLI
 
 ## License
 
