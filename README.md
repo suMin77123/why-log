@@ -17,11 +17,17 @@ AI-assisted code changes lose their reasoning context. PR reviewers see **what**
 claude plugin install why-log@claude-plugins-official
 ```
 
-**From GitHub:**
+**From GitHub (per-session):**
 ```bash
 git clone https://github.com/suMin77123/why-log.git ~/.claude/plugins/why-log
 claude --plugin-dir ~/.claude/plugins/why-log
 ```
+
+> **Note:** `--plugin-dir` loads the plugin for the current session only.
+> To auto-load in every session, add to `~/.zshrc` (or `~/.bashrc`):
+> ```bash
+> alias claude='claude --plugin-dir ~/.claude/plugins/why-log'
+> ```
 
 ### Cursor
 
