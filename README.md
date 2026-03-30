@@ -166,6 +166,28 @@ cp hooks/pre-commit-stage-decisions .git/hooks/pre-commit
 chmod +x .git/hooks/pre-commit
 ```
 
+## How It Differs from Brainstorming
+
+If you use [superpowers](https://github.com/obra/superpowers) brainstorming, you might wonder: why add another plugin?
+
+They solve different problems at different times:
+
+| | Brainstorming | Why Log |
+|---|---|---|
+| **When** | Before coding — designing what to build | During coding — recording why you built it this way |
+| **Output** | Design spec (`docs/superpowers/specs/`) | Decision logs (`docs/decisions/`) |
+| **Trigger** | You explicitly start it | Fully automatic — detects and logs on its own |
+| **Audience** | You and your team, planning | PR reviewers and your future self |
+
+**In practice, they work together:**
+
+1. Brainstorm "How should we build auth?" → design spec
+2. Start implementing → choose JWT over sessions → **why-log records it automatically**
+3. Choose bcrypt over argon2 for hashing → **why-log records it automatically**
+4. Create PR → decision summaries appear in the PR body
+
+Brainstorming decides *what to build*. Why Log captures the dozens of *why-did-you-do-it-this-way* decisions that happen during implementation — the ones no one writes down but everyone asks about in code review.
+
 ## Compatibility
 
 - Works alongside the [superpowers](https://github.com/obra/superpowers) plugin
