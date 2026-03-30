@@ -10,9 +10,12 @@
   "homepage": "https://github.com/suMin77123/why-log",
   "files": [
     ".claude-plugin/",
+    ".cursor-plugin/",
+    ".codex/",
+    ".gemini-extension/",
     "skills/",
-    "commands/",
     "hooks/",
+    "CHANGELOG.md",
     "README.md",
     "README.ko.md",
     "LICENSE"

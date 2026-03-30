@@ -29,6 +29,7 @@ for f in \
   hooks/run-hook.cmd \
   hooks/pre-commit-stage-decisions \
   package.json \
+  CHANGELOG.md \
   LICENSE \
   README.md \
   README.ko.md; do
