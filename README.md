@@ -12,24 +12,40 @@ AI-assisted code changes lose their reasoning context. PR reviewers see **what**
 
 ### Claude Code
 
+**From Marketplace (coming soon):**
 ```bash
-# From npm (recommended)
-claude plugin add why-log
-
-# From GitHub
-claude plugin add github:suMin77123/why-log
-
-# Pin to a specific version
-claude plugin add github:suMin77123/why-log#v1.0.0
+claude plugin install why-log@claude-plugins-official
 ```
 
-### Other Platforms
+**From GitHub:**
+```bash
+git clone https://github.com/suMin77123/why-log.git ~/.claude/plugins/why-log
+claude --plugin-dir ~/.claude/plugins/why-log
+```
 
-| Platform | Installation |
-|----------|-------------|
-| **Cursor** | Install via Cursor Marketplace or clone to `.cursor-plugin/` |
-| **Codex** | See [Codex installation guide](.codex/INSTALL.md) |
-| **Gemini CLI** | `gemini extensions install github:suMin77123/why-log` |
+### Cursor
+
+```
+/add-plugin why-log
+```
+
+Or clone the repo and point Cursor to the `.cursor-plugin/` directory.
+
+### Gemini CLI
+
+```bash
+gemini extensions install https://github.com/suMin77123/why-log
+```
+
+### Codex
+
+```bash
+git clone https://github.com/suMin77123/why-log.git ~/.codex/why-log
+mkdir -p ~/.agents/skills
+ln -s ~/.codex/why-log/skills ~/.agents/skills/why-log
+```
+
+See [Codex installation guide](.codex/INSTALL.md) for details.
 
 ## How It Works
 
