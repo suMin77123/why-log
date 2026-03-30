@@ -9,6 +9,48 @@ Record significant decisions alongside code changes so future readers understand
 
 **Announce at start:** "I'm using the why-log skill to record this decision."
 
+## Key Principles
+
+1. **Why > What** — Code shows what; logs show why
+2. **Signal > Noise** — What you DON'T log matters more than what you do
+3. **Inline > Separate** — Decisions belong in the same commit as the code
+4. **Compact PR, Detailed Log** — PR gets a one-line summary; full reasoning lives in the log file
+5. **Auto > Manual** — Default behavior requires zero user intervention
+6. **Reversible** — Every decision can be Superseded or Deprecated later
+
+<HARD-GATE>
+When a HIGH priority decision is detected (architecture, library selection, bug root cause,
+performance/security judgment), the decision log MUST be written BEFORE implementing code
+based on that decision. Do not proceed with implementation until the log is complete.
+</HARD-GATE>
+
+## Process Flow
+
+```dot
+digraph why_log {
+  rankdir=TB;
+  node [shape=box];
+  "Coding" [label="Coding in progress"];
+  "Detect" [label="Decision point detected?" shape=diamond];
+  "Filter" [label="Noise filter\n(3 criteria check)" shape=diamond];
+  "Write" [label="Write decision log"];
+  "Review" [label="Self-review checklist"];
+  "Fix" [label="Inline fix"];
+  "Done" [label="Log complete"];
+
+  "Coding" -> "Detect";
+  "Detect" -> "Filter" [label="yes"];
+  "Detect" -> "Coding" [label="no"];
+  "Filter" -> "Write" [label="pass"];
+  "Filter" -> "Coding" [label="filtered out"];
+  "Write" -> "Review";
+  "Review" -> "Fix" [label="issue found"];
+  "Review" -> "Done" [label="pass"];
+  "Fix" -> "Done";
+  "Done" -> "Coding";
+}
+```
+
 ## Core Principle
 
 If a future PR reviewer or your future self would ask "why did you do it this way?", log the decision.
@@ -59,7 +101,19 @@ Create a file at `docs/decisions/YYYY-MM-DD-<topic-slug>.md` using the template 
 - If a file with the same name exists, append `-2`, `-3`, etc.
 - Examples: `2026-03-30-auth-strategy-jwt-vs-session.md`, `2026-03-30-database-orm-selection.md`
 
-### Step 3: Report
+### Step 3: Self-Review
+
+After writing the log, run this checklist **inline** (no separate review pass):
+
+1. **Title:** Does it describe a single decision? (If 2+ decisions, split into separate logs)
+2. **Alternatives:** Are the listed alternatives genuinely viable? (Remove straw-man options)
+3. **Reasoning:** Does it specifically reference trade-offs? (Not vague "it seemed better")
+4. **Code Paths:** Do the paths in Related Code Paths actually exist?
+5. **Consequences:** Are they realistic and actionable?
+
+Fix any issues inline and move on. Do not re-review after fixing.
+
+### Step 4: Report
 
 After writing, briefly notify the user:
 
@@ -125,6 +179,26 @@ Use this exact template for every decision log:
 - `Accepted` — current active decision
 - `Superseded by [filename]` — replaced by a newer decision
 - `Deprecated` — no longer applicable
+
+## Anti-Pattern: Do NOT Log These
+
+- Variable/function naming choices (naming is not a decision)
+- Code formatting or style preferences
+- Patterns forced by the framework (no real choice existed)
+- "Decisions" with only one viable alternative (that's inevitability, not choice)
+- Anything already documented in CLAUDE.md, .cursorrules, or project conventions
+
+## Split vs Merge Decisions
+
+**Split into separate logs when:**
+- They affect different areas of the codebase
+- They can be independently reversed
+- Different stakeholders care about different decisions
+
+**Merge into one log when:**
+- They're cascading decisions from the same context
+- Changing one necessarily changes the other
+- They affect the same code paths
 
 ## Session Limit
 
