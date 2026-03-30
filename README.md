@@ -12,22 +12,11 @@ AI-assisted code changes lose their reasoning context. PR reviewers see **what**
 
 ### Claude Code
 
-**From Marketplace (coming soon):**
-```bash
-claude plugin install why-log@claude-plugins-official
+Run the following commands inside Claude Code:
 ```
-
-**From GitHub (per-session):**
-```bash
-git clone https://github.com/suMin77123/why-log.git ~/.claude/plugins/why-log
-claude --plugin-dir ~/.claude/plugins/why-log
+/plugin marketplace add suMin77123/why-log-marketplace
+/plugin install why-log@why-log-marketplace
 ```
-
-> **Note:** `--plugin-dir` loads the plugin for the current session only.
-> To auto-load in every session, add to `~/.zshrc` (or `~/.bashrc`):
-> ```bash
-> alias claude='claude --plugin-dir ~/.claude/plugins/why-log'
-> ```
 
 ### Cursor
 
