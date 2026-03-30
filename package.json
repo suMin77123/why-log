@@ -1,14 +1,31 @@
 {
-  "name": "decision-log",
+  "name": "why-log",
   "version": "1.0.0",
   "description": "Claude Code plugin for recording AI decision-making alongside code changes",
   "license": "MIT",
-  "repository": "https://github.com/suMin77123/decision-log",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/suMin77123/why-log.git"
+  },
+  "homepage": "https://github.com/suMin77123/why-log",
+  "files": [
+    ".claude-plugin/",
+    "skills/",
+    "commands/",
+    "hooks/",
+    "README.md",
+    "README.ko.md",
+    "LICENSE"
+  ],
   "keywords": [
     "claude-code",
+    "claude-code-plugin",
     "plugin",
     "decisions",
-    "documentation",
-    "architecture-decision-records"
+    "decision-log",
+    "architecture-decision-records",
+    "adr",
+    "code-review",
+    "ai-transparency"
   ]
 }
