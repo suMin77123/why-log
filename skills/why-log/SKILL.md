@@ -126,9 +126,13 @@ Use this exact template for every decision log:
 - `Superseded by [filename]` — replaced by a newer decision
 - `Deprecated` — no longer applicable
 
+## Session Limit
+
+**Maximum 5 decision logs per session.** After the 5th, consolidate further decisions into the most relevant existing log as "Additional Decisions" sub-sections instead of creating new files.
+
 ## Consolidating Related Decisions
 
-If multiple related decisions arise in one session, create ONE log file for the cluster:
+If multiple related decisions arise in one session, or when the session limit is reached, merge them into ONE log file:
 
 1. Use the most significant decision as the title
 2. Add sub-sections for related decisions:
@@ -140,6 +144,16 @@ If multiple related decisions arise in one session, create ONE log file for the 
 **Decision:** [Brief statement]
 **Reasoning:** [1-2 sentences]
 ```
+
+## Disabling Logging
+
+If the user says "stop logging", "no more logs", `/why-log off`, or similar, **immediately stop** creating decision logs for the rest of the session. Do not ask for confirmation — just stop and acknowledge:
+
+```
+Decision logging paused for this session.
+```
+
+To re-enable, the user can say "resume logging" or `/why-log on`.
 
 ## Auto-Staging on Commit
 
@@ -159,21 +173,20 @@ When creating a pull request with `gh pr create`, **automatically** include deci
    ```bash
    git diff --name-only $(git merge-base HEAD main)..HEAD -- docs/decisions/
    ```
-2. **If decision logs exist**, read each file and append a `## Decision Log` section to the PR body summarizing every decision:
+2. **If decision logs exist**, read each file and append a `## Decision Log` section to the PR body with a **compact bullet list** (not full details):
    ```markdown
    ## Decision Log
 
-   ### [Decision Title from file 1]
-   - **Decision:** [1-sentence summary]
-   - **Reasoning:** [1-sentence summary]
-   - **File:** `docs/decisions/YYYY-MM-DD-topic.md`
+   - **[Decision Title]**: [1-sentence decision summary]
+     → [`docs/decisions/YYYY-MM-DD-topic.md`](docs/decisions/YYYY-MM-DD-topic.md)
+   - **[Decision Title]**: [1-sentence decision summary]
+     → [`docs/decisions/YYYY-MM-DD-topic.md`](docs/decisions/YYYY-MM-DD-topic.md)
 
-   ### [Decision Title from file 2]
-   - **Decision:** [1-sentence summary]
-   - **Reasoning:** [1-sentence summary]
-   - **File:** `docs/decisions/YYYY-MM-DD-topic.md`
+   > Full reasoning and alternatives in each linked decision log.
    ```
 3. **If no decision logs exist**, do not add the section — just create the PR normally.
+
+**Important:** The PR summary is intentionally brief. Full context (alternatives, trade-offs, consequences) lives in the linked decision log files. Reviewers who want details click through; everyone else gets a quick overview.
 
 This happens every time a PR is created, with no extra user action required.
 
@@ -187,7 +200,7 @@ This happens every time a PR is created, with no extra user action required.
 
 **With commits:** Decision logs should be committed alongside the code they document. Always run `git add docs/decisions/*.md` before committing.
 
-**With PRs:** Decision logs are automatically summarized in the PR body whenever `gh pr create` is used. No separate command is needed.
+**With PRs:** Decision logs are automatically summarized in the PR body whenever `gh pr create` is used. No separate command is needed. The `/why-pr` command exists only as a manual fallback for creating PRs outside the AI-assisted workflow.
 
 ## Updating Existing Decisions
 
