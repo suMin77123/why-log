@@ -8,11 +8,25 @@ Record AI decision-making alongside code changes. Captures reasoning, alternativ
 
 AI-assisted code changes lose their reasoning context. PR reviewers see **what** changed but not **why**. Developers lose context between sessions. This plugin solves that by automatically recording decision logs in `docs/decisions/` — versioned alongside your code.
 
-## Supported Platforms
+## Installation
+
+### Claude Code
+
+```bash
+# From npm (recommended)
+claude plugin add why-log
+
+# From GitHub
+claude plugin add github:suMin77123/why-log
+
+# Pin to a specific version
+claude plugin add github:suMin77123/why-log#v1.0.0
+```
+
+### Other Platforms
 
 | Platform | Installation |
 |----------|-------------|
-| **Claude Code** | `claude plugin add github:suMin77123/why-log` |
 | **Cursor** | Install via Cursor Marketplace or clone to `.cursor-plugin/` |
 | **Codex** | See [Codex installation guide](.codex/INSTALL.md) |
 | **Gemini CLI** | `gemini extensions install github:suMin77123/why-log` |
