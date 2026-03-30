@@ -24,7 +24,7 @@ escape_for_json() {
     printf '%s' "$s"
 }
 
-CONTEXT="Decision logging is active. When you make significant decisions (architectural choices, library selections, bug root cause analysis, performance/security judgments, refactoring decisions) with 2+ alternatives and non-obvious reasoning, use the decision-log:decision-logging skill to record them in docs/decisions/. Currently ${DECISION_COUNT} decision log(s) in this project. Use /decision-log for manual logging, /decision-pr for PR creation with decision summaries."
+CONTEXT="Decision logging is active. When you make significant decisions (architectural choices, library selections, bug root cause analysis, performance/security judgments, refactoring decisions) with 2+ alternatives and non-obvious reasoning, use the why-log skill to record them in docs/decisions/. Currently ${DECISION_COUNT} decision log(s) in this project. Use /why-log for manual logging, /why-pr for PR creation with decision summaries. Say '/why-log off' to pause logging."
 
 ESCAPED=$(escape_for_json "$CONTEXT")
 
