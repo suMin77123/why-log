@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+# SessionStart hook for decision-log plugin
+# Injects a lightweight reminder about decision logging into each session.
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PLUGIN_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+
+# Count existing decision logs in the current project
+DECISION_COUNT=0
+if [ -d "docs/decisions" ]; then
+    DECISION_COUNT=$(find docs/decisions -maxdepth 1 -name '*.md' 2>/dev/null | wc -l | tr -d ' ')
+fi
+
+# Escape string for JSON embedding
+escape_for_json() {
+    local s="$1"
+    s="${s//\\/\\\\}"
+    s="${s//\"/\\\"}"
+    s="${s//$'\n'/\\n}"
+    s="${s//$'\r'/\\r}"
+    s="${s//$'\t'/\\t}"
+    printf '%s' "$s"
+}
+
+CONTEXT="Decision logging is active. When you make significant decisions (architectural choices, library selections, bug root cause analysis, performance/security judgments, refactoring decisions) with 2+ alternatives and non-obvious reasoning, use the decision-log:decision-logging skill to record them in docs/decisions/. Currently ${DECISION_COUNT} decision log(s) in this project. Use /decision-log for manual logging, /decision-pr for PR creation with decision summaries."
+
+ESCAPED=$(escape_for_json "$CONTEXT")
+
+# Output context injection as JSON
+# Cursor expects additional_context, Claude Code expects hookSpecificOutput.additionalContext
+if [ -n "${CURSOR_PLUGIN_ROOT:-}" ]; then
+    printf '{\n  "additional_context": "%s"\n}\n' "$ESCAPED"
+elif [ -n "${CLAUDE_PLUGIN_ROOT:-}" ]; then
+    printf '{\n  "hookSpecificOutput": {\n    "hookEventName": "SessionStart",\n    "additionalContext": "%s"\n  }\n}\n' "$ESCAPED"
+else
+    printf '{\n  "additional_context": "%s"\n}\n' "$ESCAPED"
+fi
+
+exit 0
