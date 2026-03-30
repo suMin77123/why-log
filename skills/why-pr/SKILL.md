@@ -1,11 +1,13 @@
 ---
 name: why-pr
-description: Use when creating a pull request - collects decision logs from docs/decisions/ and includes them as a summary in the PR description for reviewer transparency
+description: Manual fallback for creating a PR with decision log summaries — use only when the automatic PR inclusion from why-log skill was not triggered (e.g., creating a PR without AI assistance)
 ---
 
-# Decision-Aware PR Creation
+# Decision-Aware PR Creation (Manual)
 
 **Announce at start:** "I'm using the why-pr skill to create a PR with decision log summaries."
+
+> **Note:** This is a manual fallback. When the why-log skill is active, decision logs are automatically included in PRs. Use `/why-pr` only when creating a PR outside the normal AI-assisted workflow.
 
 ## Context
 
@@ -38,10 +40,10 @@ For each decision log file found:
 1. Read the file contents
 2. Extract the title (first `# ` heading)
 3. Extract the `## Decision` section (all text between `## Decision` and the next `##` heading)
-4. Format as a bullet point:
+4. Format as a compact bullet point with link:
    ```
    - **[Title]**: [Decision summary, trimmed to one line]
-     - See: `docs/decisions/YYYY-MM-DD-<topic>.md`
+     → [`docs/decisions/YYYY-MM-DD-<topic>.md`](docs/decisions/YYYY-MM-DD-<topic>.md)
    ```
 
 ### Step 4: Push and Create PR
@@ -61,7 +63,9 @@ For each decision log file found:
    ## Decision Log
    [For each decision found:]
    - **[Decision Title]**: [1-line decision summary]
-     - See: `docs/decisions/YYYY-MM-DD-<topic>.md`
+     → [`docs/decisions/YYYY-MM-DD-<topic>.md`](docs/decisions/YYYY-MM-DD-<topic>.md)
+
+   > Full reasoning and alternatives in each linked decision log.
 
    ## Test Plan
    - [ ] [Testing checklist items based on the changes]
