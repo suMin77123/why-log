@@ -1,5 +1,5 @@
 ---
-name: decision-logging
+name: why-log
 description: Use when making architectural choices, selecting between implementation alternatives, approving or modifying plans, choosing libraries or patterns, resolving trade-offs, diagnosing bug root causes, making performance or security judgments, or deciding to refactor existing code - records reasoning for future context and PR review transparency
 ---
 
@@ -7,7 +7,7 @@ description: Use when making architectural choices, selecting between implementa
 
 Record significant decisions alongside code changes so future readers understand **WHY**, not just **WHAT**.
 
-**Announce at start:** "I'm using the decision-logging skill to record this decision."
+**Announce at start:** "I'm using the why-log skill to record this decision."
 
 ## Core Principle
 
@@ -45,20 +45,9 @@ If a future PR reviewer or your future self would ask "why did you do it this wa
 
 When you recognize a decision point from the trigger signals above, pause and assess significance using the three criteria (2+ alternatives, future reader value, non-obvious reasoning).
 
-### Step 2: Confirm with User
+### Step 2: Create the Decision Log
 
-Present a brief summary and ask for confirmation:
-
-```
-I noticed a decision worth logging:
-**[One-line decision summary]**
-
-Should I record this in docs/decisions/? (yes/no)
-```
-
-If the user says no, do not log. Move on.
-
-### Step 3: Create the Decision Log
+**Do NOT ask for confirmation.** When a decision meets the criteria, log it immediately.
 
 Create `docs/decisions/` directory if it does not exist.
 
@@ -70,13 +59,15 @@ Create a file at `docs/decisions/YYYY-MM-DD-<topic-slug>.md` using the template 
 - If a file with the same name exists, append `-2`, `-3`, etc.
 - Examples: `2026-03-30-auth-strategy-jwt-vs-session.md`, `2026-03-30-database-orm-selection.md`
 
-### Step 4: Report
+### Step 3: Report
 
-After writing, report:
+After writing, briefly notify the user:
 
 ```
 Decision logged: docs/decisions/YYYY-MM-DD-<topic>.md
 ```
+
+Do not ask for review or approval. The user can read the log later if they want.
 
 ## Decision Log Template
 
@@ -150,6 +141,42 @@ If multiple related decisions arise in one session, create ONE log file for the 
 **Reasoning:** [1-2 sentences]
 ```
 
+## Auto-Staging on Commit
+
+When committing code changes, **always** stage decision logs alongside the code they document:
+
+```bash
+git add docs/decisions/*.md
+```
+
+Run this before every `git commit` that accompanies code changes. No pre-commit hook is needed — just include the `git add` as part of your normal commit workflow. Decision logs are part of the change, not an afterthought.
+
+## Auto PR Inclusion
+
+When creating a pull request with `gh pr create`, **automatically** include decision logs in the PR body. Do not wait for the user to ask or use a separate command. Follow these steps:
+
+1. **Check for decision logs on the current branch:**
+   ```bash
+   git diff --name-only $(git merge-base HEAD main)..HEAD -- docs/decisions/
+   ```
+2. **If decision logs exist**, read each file and append a `## Decision Log` section to the PR body summarizing every decision:
+   ```markdown
+   ## Decision Log
+
+   ### [Decision Title from file 1]
+   - **Decision:** [1-sentence summary]
+   - **Reasoning:** [1-sentence summary]
+   - **File:** `docs/decisions/YYYY-MM-DD-topic.md`
+
+   ### [Decision Title from file 2]
+   - **Decision:** [1-sentence summary]
+   - **Reasoning:** [1-sentence summary]
+   - **File:** `docs/decisions/YYYY-MM-DD-topic.md`
+   ```
+3. **If no decision logs exist**, do not add the section — just create the PR normally.
+
+This happens every time a PR is created, with no extra user action required.
+
 ## Integration with Other Workflows
 
 **With brainstorming:** Log decisions when the design is approved, not during exploration.
@@ -158,7 +185,9 @@ If multiple related decisions arise in one session, create ONE log file for the 
 
 **With TDD:** Implementation decisions during TDD (e.g., choosing test strategy) are loggable if they represent meaningful alternatives.
 
-**With commits:** Decision logs should be committed alongside the code they document. Stage `docs/decisions/` files with your code changes.
+**With commits:** Decision logs should be committed alongside the code they document. Always run `git add docs/decisions/*.md` before committing.
+
+**With PRs:** Decision logs are automatically summarized in the PR body whenever `gh pr create` is used. No separate command is needed.
 
 ## Updating Existing Decisions
 
@@ -173,5 +202,7 @@ When a new decision supersedes an old one:
 | Over-logging every small choice | Apply the 2-alternatives + impact test |
 | Vague reasoning ("it seemed better") | State specific trade-offs and constraints |
 | Missing code paths | Always include Related Code Paths with actual file paths |
-| Logging without user confirmation | Always ask first — semi-automatic means confirm before writing |
+| Asking for confirmation before logging | Never ask — detect and log immediately, then notify |
+| Forgetting to stage decision logs | Always `git add docs/decisions/*.md` before committing |
+| Forgetting decision logs in PRs | Always check for and include decision logs when creating PRs |
 | Stale logs left as "Accepted" | Update status when superseded |
