@@ -163,6 +163,28 @@ cp hooks/pre-commit-stage-decisions .git/hooks/pre-commit
 chmod +x .git/hooks/pre-commit
 ```
 
+## 브레인스토밍과 뭐가 다른가?
+
+[superpowers](https://github.com/obra/superpowers) 브레인스토밍을 쓰고 있다면 "왜 또 플러그인이 필요하지?"라고 생각할 수 있습니다.
+
+하는 일이 다르고, 동작하는 시점이 다릅니다:
+
+| | 브레인스토밍 | Why Log |
+|---|---|---|
+| **시점** | 코딩 **전** — 뭘 만들지 설계 | 코딩 **중** — 왜 이렇게 했는지 기록 |
+| **산출물** | 디자인 스펙 (`docs/superpowers/specs/`) | 결정 로그 (`docs/decisions/`) |
+| **트리거** | 사용자가 직접 시작 | 완전 자동 — 감지해서 알아서 기록 |
+| **독자** | 나와 팀 (기획 단계) | PR 리뷰어와 미래의 나 |
+
+**실제로는 같이 씁니다:**
+
+1. "인증 어떻게 만들지?" 브레인스토밍 → 디자인 스펙 확정
+2. 구현 시작 → JWT vs 세션 선택 → **why-log가 자동으로 기록**
+3. bcrypt vs argon2 해싱 선택 → **why-log가 자동으로 기록**
+4. PR 생성 → 결정 요약이 PR 본문에 자동 포함
+
+브레인스토밍은 *뭘 만들지* 정합니다. Why Log는 구현하면서 생기는 수십 가지 *왜 이렇게 했지?* 결정들을 잡아냅니다 — 아무도 안 적지만 코드 리뷰에서 누구나 궁금해하는 것들.
+
 ## 호환성
 
 - [superpowers](https://github.com/obra/superpowers) 플러그인과 함께 사용 가능
