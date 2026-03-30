@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# SessionStart hook for decision-log plugin
+# SessionStart hook for why-log plugin
 # Injects a lightweight reminder about decision logging into each session.
 
 set -euo pipefail
