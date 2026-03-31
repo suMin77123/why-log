@@ -19,9 +19,11 @@ Record significant decisions alongside code changes so future readers understand
 6. **Reversible** — Every decision can be Superseded or Deprecated later
 
 <HARD-GATE>
-When a HIGH priority decision is detected (architecture, library selection, bug root cause,
-performance/security judgment), the decision log MUST be written BEFORE implementing code
-based on that decision. Do not proceed with implementation until the log is complete.
+When a HIGH priority decision is detected (architecture, library selection, approach selection,
+plan modification, bug root cause, performance/security judgment), the decision MUST be recorded
+BEFORE proceeding. In normal mode, write the decision log file immediately. In restricted mode
+(e.g., plan mode where only the plan file is editable), use Deferred Logging.
+Do not continue without recording the decision.
 </HARD-GATE>
 
 ## Process Flow
@@ -30,19 +32,35 @@ based on that decision. Do not proceed with implementation until the log is comp
 digraph why_log {
   rankdir=TB;
   node [shape=box];
+
+  "Planning" [label="Planning/brainstorming\nin progress"];
   "Coding" [label="Coding in progress"];
-  "Detect" [label="Decision point detected?" shape=diamond];
+  "Detect_P" [label="Decision point\ndetected?" shape=diamond];
+  "Detect_C" [label="Decision point\ndetected?" shape=diamond];
   "Filter" [label="Noise filter\n(3 criteria check)" shape=diamond];
+  "Deferred" [label="Deferred write\n(plan file or buffer)"];
   "Write" [label="Write decision log"];
   "Review" [label="Self-review checklist"];
   "Fix" [label="Inline fix"];
   "Done" [label="Log complete"];
+  "Flush" [label="Flush deferred logs\nto decision files"];
+  "PlanExit" [label="Planning phase ends"];
 
-  "Coding" -> "Detect";
-  "Detect" -> "Filter" [label="yes"];
-  "Detect" -> "Coding" [label="no"];
-  "Filter" -> "Write" [label="pass"];
+  "Planning" -> "Detect_P";
+  "Detect_P" -> "Filter" [label="yes"];
+  "Detect_P" -> "Planning" [label="no"];
+  "Filter" -> "Deferred" [label="pass\n(restricted mode)"];
+  "Filter" -> "Write" [label="pass\n(normal mode)"];
+  "Filter" -> "Planning" [label="filtered out"];
   "Filter" -> "Coding" [label="filtered out"];
+  "Deferred" -> "Planning";
+  "Planning" -> "PlanExit";
+  "PlanExit" -> "Flush";
+  "Flush" -> "Review";
+
+  "Coding" -> "Detect_C";
+  "Detect_C" -> "Filter" [label="yes"];
+  "Detect_C" -> "Coding" [label="no"];
   "Write" -> "Review";
   "Review" -> "Fix" [label="issue found"];
   "Review" -> "Done" [label="pass"];
@@ -74,9 +92,12 @@ If a future PR reviewer or your future self would ask "why did you do it this wa
 |--------|---------|----------|
 | Architecture choice | "JWT vs sessions — let's go with JWT" | HIGH |
 | Library/dependency selection | "Prisma vs TypeORM" | HIGH |
+| Approach selection during brainstorming | "Let's go with approach A over B" | HIGH |
 | Plan approval or modification | Design confirmed after brainstorming | HIGH |
+| Plan modification | "Change the plan from X to Y because..." | HIGH |
 | Bug root cause analysis | "Root cause is X, fixing with approach Y" | HIGH |
 | Performance/security judgment | "Add index vs caching vs query optimization" | HIGH |
+| Implementation deviation from plan | "Plan said X but implementing Y instead" | MEDIUM |
 | Implementation branch point | "Using Strategy pattern here" | MEDIUM |
 | Trade-off resolution | "Prioritize readability over performance" | MEDIUM |
 | Refactoring decision | "Splitting this module because..." | MEDIUM |
@@ -173,6 +194,24 @@ Use this exact template for every decision log:
 - [What this decision means for future development]
 - [Any follow-up work this creates]
 - [Constraints this imposes on future decisions]
+
+## Decision Journey
+
+> Include this section when the decision evolved through planning/brainstorming phases.
+> Omit for simple implementation-time decisions.
+
+### Initial Request
+[What the user wanted and why this work started]
+
+### Plan Evolution
+- [Plan change 1]: [Why it changed]
+- [Plan change 2]: [Why it changed]
+
+### Implementation Changes
+- [Change from plan during implementation]: [Why]
+
+### Outcome
+[Final result and how it differs from the original request, if at all]
 ```
 
 **Status values:**
@@ -264,11 +303,51 @@ When creating a pull request with `gh pr create`, **automatically** include deci
 
 This happens every time a PR is created, with no extra user action required.
 
+## Deferred Logging
+
+Some environments restrict file creation during planning phases (e.g., plan mode only allows editing the plan file). When a decision is detected but you cannot create `docs/decisions/*.md` files:
+
+### Step 1: Record in available location
+
+Write a `## Pending Decision Logs` section at the bottom of whichever file you CAN edit (plan file, scratch buffer, or conversation notes):
+
+```markdown
+## Pending Decision Logs
+
+### [Decision Title]
+- **Initial Request:** [What the user asked for and background]
+- **Alternatives:** A vs B vs C
+- **Decision:** A
+- **Reasoning:** [Brief rationale]
+- **Plan Changes:** [Any plan modifications related to this decision]
+- **Scope:** [Affected area of codebase]
+```
+
+### Step 2: Flush after restrictions lift
+
+As soon as file creation becomes available (e.g., after exiting plan mode, before writing any implementation code):
+
+1. Read all `## Pending Decision Logs` entries
+2. Convert each entry into a full `docs/decisions/YYYY-MM-DD-<topic>.md` file using the standard template
+3. Include the Decision Journey section with Initial Request and Plan Evolution filled in
+4. Remove the `## Pending Decision Logs` section from the source file
+5. Notify the user: `Decision logged: docs/decisions/YYYY-MM-DD-<topic>.md (deferred from planning phase)`
+
+### Step 3: Continue updating through implementation
+
+As implementation progresses, update existing decision logs with:
+- **Implementation Changes** entries in Decision Journey (if deviating from plan)
+- **Outcome** section in Decision Journey (when the work is complete)
+
 ## Integration with Other Workflows
 
-**With brainstorming:** Log decisions when the design is approved, not during exploration.
+**With brainstorming:** Decisions happen throughout brainstorming, not just at the end. Log when:
+- The user selects an approach from proposed alternatives (e.g., "Let's go with approach A")
+- The user modifies or rejects a proposed design section
+- The final design is approved with specific trade-offs
+- If file creation is restricted during brainstorming, use Deferred Logging.
 
-**With plan mode:** Decisions embedded in plan approval are prime candidates for logging.
+**With plan mode:** Decisions embedded in plan creation and modification are prime candidates for logging. Since plan mode typically restricts file creation, use Deferred Logging to capture decisions in the plan file and flush them when plan mode ends.
 
 **With TDD:** Implementation decisions during TDD (e.g., choosing test strategy) are loggable if they represent meaningful alternatives.
 
