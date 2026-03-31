@@ -59,9 +59,12 @@ Decision logged: docs/decisions/2026-03-30-auth-strategy-jwt.md
 Trigger signals:
 - Architecture choices (JWT vs sessions)
 - Library/dependency selection (Prisma vs TypeORM)
+- Approach selection during brainstorming
+- Plan approval or modification
+- Plan modifications during planning
 - Bug root cause analysis
 - Performance/security judgments
-- Plan approval or modification
+- Implementation deviation from plan
 - Implementation branch points
 - Trade-off resolutions
 - Refactoring decisions
@@ -143,25 +146,33 @@ The skill only logs decisions that meet ALL criteria:
 ## Workflow Example
 
 ```
-1. Start coding session
+1. Start session
    -> Hook: "Decision logging active, 3 existing logs"
 
 2. Brainstorm auth approaches with AI
    -> AI presents JWT vs sessions vs OAuth
+   -> You choose JWT
+   -> AI records decision (or defers if in plan mode)
 
-3. Choose JWT
-   -> AI automatically logs the decision
-   -> "Decision logged: docs/decisions/2026-03-30-auth-strategy-jwt.md"
+3. Plan the implementation
+   -> You modify plan: "Use refresh tokens instead of short-lived only"
+   -> AI records plan modification decision (deferred to plan file)
 
-4. Continue implementation...
+4. Exit planning, start coding
+   -> AI flushes deferred decisions to docs/decisions/*.md
+   -> "Decision logged: docs/decisions/2026-03-30-auth-strategy-jwt.md (deferred from planning phase)"
 
-5. Commit code
+5. During implementation, deviate from plan
+   -> "Using httpOnly cookies instead of localStorage"
+   -> AI updates the existing decision log with implementation change
+
+6. Commit code
    -> AI runs: git add docs/decisions/*.md + code files
    -> Decision log included in same commit
 
-6. Create PR
+7. Create PR
    -> AI auto-includes Why Log section in PR body
-   -> Reviewer sees WHY before reviewing HOW
+   -> Reviewer sees the full decision journey: request → plan → changes → result
 ```
 
 ## Hook Setup
@@ -181,23 +192,25 @@ chmod +x .git/hooks/pre-commit
 
 If you use [superpowers](https://github.com/obra/superpowers) brainstorming, you might wonder: why add another plugin?
 
-They solve different problems at different times:
+They solve different problems:
 
 | | Brainstorming | Why Log |
 |---|---|---|
-| **When** | Before coding — designing what to build | During coding — recording why you built it this way |
+| **When** | Before coding — designing what to build | Throughout — from initial request to final result |
 | **Output** | Design spec (`docs/superpowers/specs/`) | Decision logs (`docs/decisions/`) |
 | **Trigger** | You explicitly start it | Fully automatic — detects and logs on its own |
 | **Audience** | You and your team, planning | PR reviewers and your future self |
+| **Captures** | The design process | The reasoning behind choices |
 
 **In practice, they work together:**
 
-1. Brainstorm "How should we build auth?" → design spec
-2. Start implementing → choose JWT over sessions → **why-log records it automatically**
-3. Choose bcrypt over argon2 for hashing → **why-log records it automatically**
-4. Create PR → decision summaries appear in the PR body
+1. Brainstorm "How should we build auth?" → you choose JWT over sessions → **why-log records it**
+2. Plan the implementation → you modify the plan → **why-log records the change**
+3. Start implementing → deviate from plan → **why-log updates the decision log**
+4. Complete the work → **why-log records the outcome**
+5. Create PR → decision summaries with full journey appear in the PR body
 
-Brainstorming decides *what to build*. Why Log captures the dozens of *why-did-you-do-it-this-way* decisions that happen during implementation — the ones no one writes down but everyone asks about in code review.
+Brainstorming is a *design process*. Why Log captures *the reasoning behind every choice* — from the initial request through planning, implementation, and final result.
 
 ## Compatibility
 
