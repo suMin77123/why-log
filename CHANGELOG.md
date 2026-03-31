@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [1.1.0] - 2026-03-31
+
+### Fixed
+- SessionStart hook now injects full bootstrap context instead of a one-line reminder
+  - AI can now automatically detect and log decisions without manual `/why-log` invocation
+  - Deferred logging format included inline for plan mode / brainstorming phases
+  - Strong mandatory language (`<HARD-GATE>`) ensures compliance
+
+### Added
+- `hooks/bootstrap-context.md` — externalized bootstrap context file (follows superpowers plugin pattern)
+  - Trigger signal table, 3-criteria noise filter, deferred logging format, flush instructions
+
 ## [1.0.0] - 2026-03-30
 
 ### Added
@@ -26,4 +38,5 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 - Documentation in English and Korean
 - Smoke test suite with 9 test sections
 
+[1.1.0]: https://github.com/suMin77123/why-log/releases/tag/v1.1.0
 [1.0.0]: https://github.com/suMin77123/why-log/releases/tag/v1.0.0

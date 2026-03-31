@@ -1,7 +1,7 @@
 {
   "name": "why-log",
   "description": "Record AI decision-making alongside code changes. Captures reasoning, alternatives, and trade-offs in per-change markdown documents for PR review transparency and context preservation.",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "author": {
     "name": "suMin77123"
   },

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # SessionStart hook for why-log plugin
-# Injects a lightweight reminder about decision logging into each session.
+# Injects bootstrap context with decision logging instructions into each session.
 
 set -euo pipefail
 
@@ -13,7 +13,12 @@ if [ -d "docs/decisions" ]; then
     DECISION_COUNT=$(find docs/decisions -maxdepth 1 -name '*.md' 2>/dev/null | wc -l | tr -d ' ')
 fi
 
-# Escape string for JSON embedding
+# Read bootstrap context file and substitute placeholders
+BOOTSTRAP_CONTENT=$(cat "${PLUGIN_ROOT}/hooks/bootstrap-context.md" 2>&1 || echo "Error reading bootstrap context")
+BOOTSTRAP_CONTENT="${BOOTSTRAP_CONTENT//\{\{DECISION_COUNT\}\}/$DECISION_COUNT}"
+
+# Escape string for JSON embedding using bash parameter substitution.
+# Each ${s//old/new} is a single C-level pass — fast and portable.
 escape_for_json() {
     local s="$1"
     s="${s//\\/\\\\}"
@@ -24,12 +29,11 @@ escape_for_json() {
     printf '%s' "$s"
 }
 
-CONTEXT="Decision logging is active. When you make significant decisions (architectural choices, library selections, approach selections during brainstorming, plan modifications, bug root cause analysis, performance/security judgments, refactoring decisions) with 2+ alternatives and non-obvious reasoning, use the why-log skill to record them in docs/decisions/. During planning phases where file creation is restricted, use Deferred Logging (record in plan file, flush to decision files when restrictions lift). Currently ${DECISION_COUNT} decision log(s) in this project. Use /why-log for manual logging, /why-pr for PR creation with decision summaries. Say '/why-log off' to pause logging."
-
-ESCAPED=$(escape_for_json "$CONTEXT")
+ESCAPED=$(escape_for_json "$BOOTSTRAP_CONTENT")
 
 # Output context injection as JSON
 # Cursor expects additional_context, Claude Code expects hookSpecificOutput.additionalContext
+# Only emit the field for the current platform to avoid double injection.
 if [ -n "${CURSOR_PLUGIN_ROOT:-}" ]; then
     printf '{\n  "additional_context": "%s"\n}\n' "$ESCAPED"
 elif [ -n "${CLAUDE_PLUGIN_ROOT:-}" ]; then
