@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [1.3.0] - 2026-04-14
+
+### Added
+- **PreToolUse commit guard** — `PreToolUse` hook blocks `git commit` when unstaged decision logs exist in `docs/decisions/`
+  - Tells AI to ask user before including decision logs in commits
+  - Warns if `docs/decisions/` is in `.gitignore` (which prevents committing)
+  - `WHY_LOG_SKIP=1` prefix bypasses the check when user declines
+  - Claude Code only (Cursor does not support PreToolUse hooks yet)
+- **Gitignore protection** — explicit instructions in SKILL.md and bootstrap-context.md to never add `docs/decisions/` to `.gitignore`
+
+### Changed
+- Commit Behavior section rewritten to reference the PreToolUse hook instead of relying on prompt-only instructions
+- Smoke tests expanded with pre-commit-check functional tests
+
 ## [1.2.0] - 2026-04-13
 
 ### Added
@@ -56,6 +70,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 - Documentation in English and Korean
 - Smoke test suite with 9 test sections
 
+[1.3.0]: https://github.com/suMin77123/why-log/releases/tag/v1.3.0
 [1.2.0]: https://github.com/suMin77123/why-log/releases/tag/v1.2.0
 [1.1.0]: https://github.com/suMin77123/why-log/releases/tag/v1.1.0
 [1.0.0]: https://github.com/suMin77123/why-log/releases/tag/v1.0.0

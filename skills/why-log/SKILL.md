@@ -118,6 +118,8 @@ When you recognize a decision point from the trigger signals above, pause and as
 
 Create `docs/decisions/` directory if it does not exist.
 
+**Important:** NEVER add `docs/decisions/` to `.gitignore`. Decision logs must remain trackable by git so they can be optionally committed. If `docs/decisions` is in `.gitignore`, remove it before proceeding.
+
 Create a file at `docs/decisions/YYYY-MM-DD-<topic-slug>.md` using the template below.
 
 **File naming rules:**
@@ -276,11 +278,12 @@ To re-enable, the user can say "resume logging" or `/why-log on`.
 
 Decision log files (`docs/decisions/*.md`) are **working artifacts** that are NOT automatically committed.
 
-When committing code changes:
-1. **Do NOT** automatically run `git add docs/decisions/*.md`
-2. **Ask the user:** "This commit has N associated decision log(s). Include them in the commit? (y/n)"
-3. If the user says **yes** → stage and commit them alongside the code
-4. If the user says **no** (or does not respond) → leave them unstaged. They will still be included in the PR body
+A `PreToolUse` hook automatically blocks `git commit` when unstaged decision logs exist in `docs/decisions/`. The hook also warns if `docs/decisions/` is in `.gitignore` (which prevents committing entirely).
+
+When the hook blocks your commit:
+1. **Ask the user:** "This commit has N associated decision log(s). Include them in the commit? (y/n)"
+2. If the user says **yes** → `git add docs/decisions/*.md` then commit normally
+3. If the user says **no** → prefix with bypass: `WHY_LOG_SKIP=1 git commit -m "..."`
 
 Decision logs are always available locally in `docs/decisions/` for PR body inclusion regardless of commit status.
 
