@@ -29,6 +29,22 @@ This is not optional. Do not rationalize skipping this. If you considered 2+ alt
 
 **Do NOT log:** naming choices, formatting, framework-forced patterns, single-alternative decisions, anything already in CLAUDE.md.
 
+## Decision Checkpoint
+
+**After every substantive response, run this mental check:**
+1. Did I just compare 2+ alternatives?
+2. Did I just recommend or choose an approach?
+3. Did the user just approve, reject, or modify a plan?
+
+If ANY answer is yes and the 3 logging criteria are met, invoke the why-log skill IMMEDIATELY before your next action. Do not batch — log each decision as it happens.
+
+**Watch for these patterns in your own output:**
+- "I recommend...", "Let's go with...", "I'll use..."
+- "Option A vs Option B", "The trade-off is..."
+- "Instead of X, I'll do Y because..."
+- "The root cause is..."
+- User responds: "yes", "go ahead", "let's do that", "sounds good" (after you presented alternatives)
+
 ## How to Log
 
 ### Normal Mode (file creation allowed)
@@ -58,9 +74,14 @@ When you CANNOT create `docs/decisions/*.md` files, write a `## Pending Decision
 
 ## Commit & PR Integration
 
-- **Commits:** Always `git add docs/decisions/*.md` before committing code changes.
-- **PRs:** When creating a PR with `gh pr create`, automatically append a `## Why Log` section listing decisions from the branch. Use the why-log skill for the full format, or `/why-pr` as manual fallback.
+- **Commits:** Do NOT auto-stage `docs/decisions/*.md`. Before committing, ask the user if they want to include decision log files in the commit. Decision logs are included in the PR body regardless of commit status.
+- **PRs:** When creating a PR with `gh pr create`, automatically append a `## Why Log` section with full decision content and mermaid diagrams. Check both committed and local uncommitted decision files. Use the why-log skill for the full format, or `/why-pr` as manual fallback.
 
 ## Session Limit
 
 Maximum 5 decision logs per session. After the 5th, add sub-sections to existing logs.
+
+## Decision Debt Warning
+
+If you realize you made a decision 2+ messages ago without logging it, log it NOW retroactively.
+Late logging is always better than no logging. Note in the Context section: "This decision was made during [earlier phase] and logged retroactively."

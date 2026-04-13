@@ -13,7 +13,7 @@ Record significant decisions alongside code changes so future readers understand
 
 1. **Why > What** — Code shows what; logs show why
 2. **Signal > Noise** — What you DON'T log matters more than what you do
-3. **Inline > Separate** — Decisions belong in the same commit as the code
+3. **PR Body > Code Commit** — Decisions always appear in PR body; committing files to repo is user's choice
 4. **Compact PR, Detailed Log** — PR gets a one-line summary; full reasoning lives in the log file
 5. **Auto > Manual** — Default behavior requires zero user intervention
 6. **Reversible** — Every decision can be Superseded or Deprecated later
@@ -24,6 +24,10 @@ plan modification, bug root cause, performance/security judgment), the decision 
 BEFORE proceeding. In normal mode, write the decision log file immediately. In restricted mode
 (e.g., plan mode where only the plan file is editable), use Deferred Logging.
 Do not continue without recording the decision.
+
+SELF-MONITORING: After generating any response where you compared alternatives or recommended
+an approach, STOP and ask yourself: "Did I just make a loggable decision?" If yes, invoke
+this skill before proceeding. This check is mandatory, not aspirational.
 </HARD-GATE>
 
 ## Process Flow
@@ -268,40 +272,113 @@ Decision logging paused for this session.
 
 To re-enable, the user can say "resume logging" or `/why-log on`.
 
-## Auto-Staging on Commit
+## Commit Behavior
 
-When committing code changes, **always** stage decision logs alongside the code they document:
+Decision log files (`docs/decisions/*.md`) are **working artifacts** that are NOT automatically committed.
 
-```bash
-git add docs/decisions/*.md
-```
+When committing code changes:
+1. **Do NOT** automatically run `git add docs/decisions/*.md`
+2. **Ask the user:** "This commit has N associated decision log(s). Include them in the commit? (y/n)"
+3. If the user says **yes** → stage and commit them alongside the code
+4. If the user says **no** (or does not respond) → leave them unstaged. They will still be included in the PR body
 
-Run this before every `git commit` that accompanies code changes. No pre-commit hook is needed — just include the `git add` as part of your normal commit workflow. Decision logs are part of the change, not an afterthought.
+Decision logs are always available locally in `docs/decisions/` for PR body inclusion regardless of commit status.
 
 ## Auto PR Inclusion
 
-When creating a pull request with `gh pr create`, **automatically** include decision logs in the PR body. Do not wait for the user to ask or use a separate command. Follow these steps:
+When creating a pull request with `gh pr create`, **automatically** include decision logs in the PR body. Decision logs are included **regardless of whether they are committed** to the repo.
 
-1. **Check for decision logs on the current branch:**
+1. **Find decision logs for this branch (both committed and local):**
    ```bash
-   git diff --name-only $(git merge-base HEAD main)..HEAD -- docs/decisions/
+   # Committed decision logs
+   git diff --name-only $(git merge-base HEAD main)..HEAD -- docs/decisions/ 2>/dev/null
+   # Uncommitted local decision logs
+   ls docs/decisions/*.md 2>/dev/null
    ```
-2. **If decision logs exist**, read each file and append a `## Why Log` section to the PR body with a **compact bullet list** (not full details):
+   Combine both lists and deduplicate by filename.
+
+2. **Read each decision log file** from the local filesystem and build the `## Why Log` section with **full inline content** (since files may not be committed to the repo):
+
    ```markdown
    ## Why Log
 
-   - **[Decision Title]**: [1-sentence decision summary]
-     → [`docs/decisions/YYYY-MM-DD-topic.md`](docs/decisions/YYYY-MM-DD-topic.md)
-   - **[Decision Title]**: [1-sentence decision summary]
-     → [`docs/decisions/YYYY-MM-DD-topic.md`](docs/decisions/YYYY-MM-DD-topic.md)
+   ### [Decision Title]
+   **Decision:** [Content from ## Decision section]
+   **Alternatives:** [Summary from ## Alternatives Considered — list each alternative name and its key pros/cons in one line each]
+   **Reasoning:** [Content from ## Reasoning section]
+   **Trade-offs:** [Content from ## Trade-offs Accepted section]
 
-   > Full reasoning and alternatives in each linked decision log.
+   ---
+
+   ### [Next Decision Title]
+   ...
+
+   [MERMAID DIAGRAM — see "Mermaid Diagrams in PR Body" section below]
    ```
+
 3. **If no decision logs exist**, do not add the section — just create the PR normally.
 
-**Important:** The PR summary is intentionally brief. Full context (alternatives, trade-offs, consequences) lives in the linked decision log files. Reviewers who want details click through; everyone else gets a quick overview.
+**Important:** Since decision log files may not be committed to the repo, the PR body must be **self-contained**. Include the decision, alternatives, reasoning, and trade-offs inline. Reviewers get full context directly in the PR without needing to check out the branch.
 
 This happens every time a PR is created, with no extra user action required.
+
+## Mermaid Diagrams in PR Body
+
+When building the `## Why Log` section for a PR, **always append a mermaid diagram** at the end, after all textual decision summaries. Choose the most appropriate diagram type based on the decisions:
+
+### Alternatives Comparison (1 decision with 2+ alternatives)
+
+Use when a single key decision had multiple options:
+
+````markdown
+```mermaid
+flowchart LR
+    D{Decision Title}
+    D -->|"✅ Chosen"| A["Option A<br/>key advantage"]
+    D -.->|"❌"| B["Option B<br/>key disadvantage"]
+    D -.->|"❌"| C["Option C<br/>key disadvantage"]
+```
+````
+
+### Decision Flow (2+ sequential/dependent decisions)
+
+Use when decisions were made in sequence, each building on the previous:
+
+````markdown
+```mermaid
+flowchart TD
+    P["Initial Problem"] --> D1{Decision 1}
+    D1 -->|"Chosen: Option A"| R1["Result/Reason"]
+    D1 -.->|"Rejected: Option B"| X1["Why rejected"]
+    R1 --> D2{Decision 2}
+    D2 -->|"Chosen: Option X"| R2["Result/Reason"]
+    D2 -.->|"Rejected: Option Y"| X2["Why rejected"]
+```
+````
+
+### Decision Timeline (3+ independent decisions across phases)
+
+Use when multiple independent decisions were made throughout the work:
+
+````markdown
+```mermaid
+timeline
+    title Decision Timeline
+    section Planning
+        Decision 1 : Chose X over Y — reason
+    section Implementation
+        Decision 2 : Chose A over B — reason
+        Decision 3 : Chose P over Q — reason
+```
+````
+
+**Diagram selection rules:**
+- 1 decision with 2+ alternatives → **Alternatives Comparison**
+- 2+ sequential/dependent decisions → **Decision Flow**
+- 3+ independent decisions across phases → **Decision Timeline**
+- When in doubt → **Decision Flow**
+
+**Always place the diagram at the end of the `## Why Log` section**, after all textual decision summaries.
 
 ## Deferred Logging
 
@@ -351,7 +428,7 @@ As implementation progresses, update existing decision logs with:
 
 **With TDD:** Implementation decisions during TDD (e.g., choosing test strategy) are loggable if they represent meaningful alternatives.
 
-**With commits:** Decision logs should be committed alongside the code they document. Always run `git add docs/decisions/*.md` before committing.
+**With commits:** Decision logs are NOT auto-staged. Ask the user before including them in a commit. They are always included in the PR body regardless.
 
 **With PRs:** Decision logs are automatically summarized in the PR body whenever `gh pr create` is used. No separate command is needed. The `/why-pr` command exists only as a manual fallback for creating PRs outside the AI-assisted workflow.
 
@@ -369,6 +446,6 @@ When a new decision supersedes an old one:
 | Vague reasoning ("it seemed better") | State specific trade-offs and constraints |
 | Missing code paths | Always include Related Code Paths with actual file paths |
 | Asking for confirmation before logging | Never ask — detect and log immediately, then notify |
-| Forgetting to stage decision logs | Always `git add docs/decisions/*.md` before committing |
+| Auto-staging decision logs without asking | Ask the user before including decision files in commits |
 | Forgetting decision logs in PRs | Always check for and include decision logs when creating PRs |
 | Stale logs left as "Accepted" | Update status when superseded |
