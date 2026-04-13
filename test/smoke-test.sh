@@ -28,6 +28,7 @@ for f in \
   hooks/hooks.json \
   hooks/hooks-cursor.json \
   hooks/session-start \
+  hooks/pre-commit-check \
   hooks/run-hook.cmd \
   hooks/bootstrap-context.md \
   package.json \
@@ -94,6 +95,17 @@ assert 'SessionStart' in h, 'no SessionStart hook'
 assert len(h['SessionStart']) > 0, 'SessionStart is empty'
 " 2>/dev/null && pass "hooks.json has SessionStart event" || fail "hooks.json missing SessionStart"
 
+  # hooks.json — must define PreToolUse event for Bash
+  python3 -c "
+import json
+d = json.load(open('$PLUGIN_ROOT/hooks/hooks.json'))
+h = d.get('hooks', d)
+assert 'PreToolUse' in h, 'no PreToolUse hook'
+assert len(h['PreToolUse']) > 0, 'PreToolUse is empty'
+pt = h['PreToolUse'][0]
+assert pt.get('matcher') == 'Bash', 'PreToolUse matcher should be Bash'
+" 2>/dev/null && pass "hooks.json has PreToolUse event for Bash" || fail "hooks.json missing PreToolUse"
+
   # hooks-cursor.json — must define sessionStart (nested dict format: hooks.sessionStart)
   python3 -c "
 import json
@@ -109,7 +121,7 @@ fi
 # ─────────────────────────────────────────────────────────
 echo ""
 echo "[3/8] Hook execution..."
-for f in hooks/session-start hooks/run-hook.cmd; do
+for f in hooks/session-start hooks/pre-commit-check hooks/run-hook.cmd; do
   [ -x "$PLUGIN_ROOT/$f" ] && pass "$f executable" || fail "$f not executable"
 done
 
@@ -124,7 +136,7 @@ ctx = d['hookSpecificOutput']['additionalContext']
 assert 'HARD-GATE' in ctx, 'missing HARD-GATE in context'
 assert 'Decision Checkpoint' in ctx, 'missing Decision Checkpoint in context'
 assert 'Decision Debt Warning' in ctx, 'missing Decision Debt Warning in context'
-assert 'Do NOT auto-stage' in ctx, 'missing commit behavior in context'
+assert 'PreToolUse' in ctx, 'missing commit behavior in context'
 assert '{{DECISION_COUNT}}' not in ctx, 'placeholder not replaced'
 " 2>/dev/null; then
   pass "Claude Code hook: valid JSON with required context"
@@ -145,6 +157,69 @@ assert 'Decision Checkpoint' in ctx, 'missing checkpoint'
 else
   fail "Cursor hook: missing required context sections"
 fi
+
+# pre-commit-check: non-git-commit command passes silently
+RESULT=$(echo '{"tool_name":"Bash","tool_input":{"command":"ls -la"}}' | bash "$PLUGIN_ROOT/hooks/pre-commit-check" 2>&1)
+if [ -z "$RESULT" ]; then
+  pass "pre-commit-check: allows non-git-commit"
+else
+  fail "pre-commit-check: should allow non-git-commit"
+fi
+
+# pre-commit-check: git commit with no docs/decisions/ passes
+TMPDIR_TEST=$(mktemp -d)
+(cd "$TMPDIR_TEST" && git init -q)
+RESULT=$(cd "$TMPDIR_TEST" && echo '{"tool_name":"Bash","tool_input":{"command":"git commit -m test"}}' | bash "$PLUGIN_ROOT/hooks/pre-commit-check" 2>&1)
+if [ -z "$RESULT" ]; then
+  pass "pre-commit-check: allows commit with no docs/decisions/"
+else
+  fail "pre-commit-check: should allow commit with no docs/decisions/"
+fi
+rm -rf "$TMPDIR_TEST"
+
+# pre-commit-check: blocks commit with unstaged decision logs
+TMPDIR_TEST=$(mktemp -d)
+(cd "$TMPDIR_TEST" && git init -q && mkdir -p docs/decisions && echo "test" > docs/decisions/2026-01-01-test.md)
+RESULT=$(cd "$TMPDIR_TEST" && echo '{"tool_name":"Bash","tool_input":{"command":"git commit -m test"}}' | bash "$PLUGIN_ROOT/hooks/pre-commit-check" 2>&1)
+if echo "$RESULT" | python3 -c "import json,sys; d=json.load(sys.stdin); assert d['decision']=='block'" 2>/dev/null; then
+  pass "pre-commit-check: blocks commit with unstaged decision logs"
+else
+  fail "pre-commit-check: should block commit with unstaged decision logs"
+fi
+rm -rf "$TMPDIR_TEST"
+
+# pre-commit-check: WHY_LOG_SKIP bypass works
+TMPDIR_TEST=$(mktemp -d)
+(cd "$TMPDIR_TEST" && git init -q && mkdir -p docs/decisions && echo "test" > docs/decisions/2026-01-01-test.md)
+RESULT=$(cd "$TMPDIR_TEST" && echo '{"tool_name":"Bash","tool_input":{"command":"WHY_LOG_SKIP=1 git commit -m test"}}' | bash "$PLUGIN_ROOT/hooks/pre-commit-check" 2>&1)
+if [ -z "$RESULT" ]; then
+  pass "pre-commit-check: WHY_LOG_SKIP bypass works"
+else
+  fail "pre-commit-check: WHY_LOG_SKIP should bypass check"
+fi
+rm -rf "$TMPDIR_TEST"
+
+# pre-commit-check: allows commit when all decision logs staged
+TMPDIR_TEST=$(mktemp -d)
+(cd "$TMPDIR_TEST" && git init -q && mkdir -p docs/decisions && echo "test" > docs/decisions/2026-01-01-test.md && git add docs/decisions/2026-01-01-test.md)
+RESULT=$(cd "$TMPDIR_TEST" && echo '{"tool_name":"Bash","tool_input":{"command":"git commit -m test"}}' | bash "$PLUGIN_ROOT/hooks/pre-commit-check" 2>&1)
+if [ -z "$RESULT" ]; then
+  pass "pre-commit-check: allows commit when all decision logs staged"
+else
+  fail "pre-commit-check: should allow when all decision logs staged"
+fi
+rm -rf "$TMPDIR_TEST"
+
+# pre-commit-check: blocks and warns when docs/decisions in .gitignore
+TMPDIR_TEST=$(mktemp -d)
+(cd "$TMPDIR_TEST" && git init -q && echo "docs/decisions/" > .gitignore && mkdir -p docs/decisions && echo "test" > docs/decisions/2026-01-01-test.md)
+RESULT=$(cd "$TMPDIR_TEST" && echo '{"tool_name":"Bash","tool_input":{"command":"git commit -m test"}}' | bash "$PLUGIN_ROOT/hooks/pre-commit-check" 2>&1)
+if echo "$RESULT" | python3 -c "import json,sys; d=json.load(sys.stdin); assert d['decision']=='block'; assert '.gitignore' in d['reason']" 2>/dev/null; then
+  pass "pre-commit-check: blocks and warns about .gitignore"
+else
+  fail "pre-commit-check: should block and warn about .gitignore"
+fi
+rm -rf "$TMPDIR_TEST"
 
 # ─────────────────────────────────────────────────────────
 # 4. SKILL.md frontmatter (both skills)
@@ -228,8 +303,15 @@ else
   fail "HARD-GATE missing SELF-MONITORING or mandatory language"
 fi
 
+# Gitignore protection must be present
+if grep -q 'NEVER add.*docs/decisions.*gitignore\|NEVER.*gitignore.*docs/decisions' "$SKILL"; then
+  pass "Gitignore protection present"
+else
+  fail "Missing gitignore protection"
+fi
+
 # Commit behavior must say NOT auto-stage
-if grep -q 'Do NOT.*auto.*stage\|NOT automatically committed\|Do NOT.*automatically run' "$SKILL"; then
+if grep -q 'Do NOT.*auto.*stage\|NOT automatically committed\|Do NOT.*automatically run\|NOT automatically committed' "$SKILL"; then
   pass "Commit section prohibits auto-staging"
 else
   fail "Commit section does not prohibit auto-staging"
@@ -302,11 +384,18 @@ else
   fail "Missing {{DECISION_COUNT}} placeholder"
 fi
 
-# Commit instructions must be consistent with SKILL.md (no auto-stage)
-if grep -q 'Do NOT auto-stage' "$BC"; then
-  pass "Commit instructions consistent (no auto-stage)"
+# Gitignore protection in bootstrap context
+if grep -q 'NEVER add.*docs/decisions.*gitignore\|NEVER.*gitignore.*docs/decisions' "$BC"; then
+  pass "Bootstrap has gitignore protection"
 else
-  fail "Commit instructions inconsistent — should say Do NOT auto-stage"
+  fail "Bootstrap missing gitignore protection"
+fi
+
+# Commit instructions must reference PreToolUse hook
+if grep -q 'PreToolUse' "$BC"; then
+  pass "Commit instructions reference PreToolUse hook"
+else
+  fail "Commit instructions missing PreToolUse reference"
 fi
 
 # Must reference both /why-log and /why-pr commands

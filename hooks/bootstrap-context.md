@@ -72,9 +72,13 @@ When you CANNOT create `docs/decisions/*.md` files, write a `## Pending Decision
 2. Invoke the why-log skill to convert each entry into a full `docs/decisions/YYYY-MM-DD-<topic>.md` file
 3. Remove the `## Pending Decision Logs` section from the source file
 
+## Gitignore Rule
+
+**NEVER add `docs/decisions/` to `.gitignore`.** Decision logs must remain trackable by git so they can be optionally committed. If you find `docs/decisions` in `.gitignore`, remove it.
+
 ## Commit & PR Integration
 
-- **Commits:** Do NOT auto-stage `docs/decisions/*.md`. Before committing, ask the user if they want to include decision log files in the commit. Decision logs are included in the PR body regardless of commit status.
+- **Commits:** A `PreToolUse` hook blocks `git commit` when unstaged decision logs exist in `docs/decisions/`. It also warns if `docs/decisions/` is in `.gitignore`. When blocked, ask the user: "Include decision logs in this commit? (y/n)". If yes: `git add docs/decisions/*.md` then commit. If no: prefix with `WHY_LOG_SKIP=1` (e.g., `WHY_LOG_SKIP=1 git commit -m "..."`).
 - **PRs:** When creating a PR with `gh pr create`, automatically append a `## Why Log` section with full decision content and mermaid diagrams. Check both committed and local uncommitted decision files. Use the why-log skill for the full format, or `/why-pr` as manual fallback.
 
 ## Session Limit

@@ -1,0 +1,77 @@
+#!/usr/bin/env bash
+# PreToolUse hook: blocks git commit when unstaged decision logs exist.
+# Also warns if docs/decisions/ is in .gitignore (which prevents committing).
+
+set -euo pipefail
+
+# Read stdin JSON to extract the bash command
+INPUT=$(cat)
+COMMAND=$(echo "$INPUT" | python3 -c "
+import json,sys
+d=json.load(sys.stdin)
+print(d.get('tool_input',{}).get('command',''))
+" 2>/dev/null || echo "")
+
+# Only act on git commit commands
+echo "$COMMAND" | grep -qE '\bgit\b.*\bcommit\b' || exit 0
+
+# WHY_LOG_SKIP bypass (user already declined to include decision logs)
+echo "$COMMAND" | grep -qE '\bWHY_LOG_SKIP=' && exit 0
+
+# No docs/decisions/ directory — nothing to check
+[ -d "docs/decisions" ] || exit 0
+
+# Check if .gitignore blocks docs/decisions/
+GITIGNORE_WARNING=""
+if [ -f ".gitignore" ] && grep -qE '^docs/decisions' .gitignore 2>/dev/null; then
+  GITIGNORE_WARNING="WARNING: docs/decisions/ is in .gitignore — decision logs cannot be committed. Remove it from .gitignore first.\n\n"
+fi
+
+# Find unstaged decision log files
+# 1. Untracked (new, not gitignored)
+UNSTAGED=$(git ls-files --others --exclude-standard -- 'docs/decisions/*.md' 2>/dev/null || true)
+# 2. Modified but not staged
+MODIFIED=$(git diff --name-only -- docs/decisions/ 2>/dev/null || true)
+ALL_UNSTAGED=$(printf '%s\n%s' "$UNSTAGED" "$MODIFIED" | sort -u | grep -v '^$' || true)
+
+# Check files directly on disk (catches gitignored files too)
+EXISTING=$(ls docs/decisions/*.md 2>/dev/null || true)
+
+# Case 1: gitignored + files exist on disk → block with warning
+if [ -n "$GITIGNORE_WARNING" ] && [ -n "$EXISTING" ]; then
+  COUNT=$(echo "$EXISTING" | wc -l | tr -d ' ')
+  python3 -c "
+import json
+reason = (
+    'WARNING: docs/decisions/ is in .gitignore — decision logs cannot be committed. '
+    'Remove it from .gitignore first.\n\n'
+    'Found $COUNT decision log(s) in docs/decisions/ that cannot be tracked by git.\n'
+    'Remove docs/decisions from .gitignore, then ask the user: '
+    '\"Include these decision logs in the commit? (y/n)\"\n'
+    '- If yes: git add docs/decisions/*.md\n'
+    '- If no: WHY_LOG_SKIP=1 git commit -m \"...\"'
+)
+print(json.dumps({'decision': 'block', 'reason': reason}))
+"
+  exit 0
+fi
+
+# Case 2: unstaged decision logs exist → block
+if [ -n "$ALL_UNSTAGED" ]; then
+  COUNT=$(echo "$ALL_UNSTAGED" | wc -l | tr -d ' ')
+  python3 -c "
+import json
+files = '''$ALL_UNSTAGED'''
+reason = (
+    'Found ' + str($COUNT) + ' unstaged decision log(s):\n'
+    + files + '\n\n'
+    'Ask the user: \"Include these decision logs in the commit? (y/n)\"\n'
+    '- If yes: git add docs/decisions/*.md\n'
+    '- If no: WHY_LOG_SKIP=1 git commit -m \"...\"'
+)
+print(json.dumps({'decision': 'block', 'reason': reason}))
+"
+  exit 0
+fi
+
+# All decision logs are staged or none exist — allow
