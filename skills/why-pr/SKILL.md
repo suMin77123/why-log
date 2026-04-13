@@ -26,25 +26,43 @@ The base branch defaults to `main`. If the user provided an argument, use that i
 
 ### Step 2: Collect Decision Logs
 
-Find all `docs/decisions/*.md` files added or modified in this branch compared to the base branch:
+Find all `docs/decisions/*.md` files — both committed and uncommitted:
 
 ```bash
-git diff --name-only ${BASE_BRANCH}...HEAD -- docs/decisions/
+# Committed decision logs on this branch
+git diff --name-only ${BASE_BRANCH}...HEAD -- docs/decisions/ 2>/dev/null
+# Uncommitted local decision logs
+ls docs/decisions/*.md 2>/dev/null
 ```
 
-If no decision log files are found, skip to Step 4 and create the PR without a Why Log section.
+Combine both lists and deduplicate by filename. If no decision log files are found, skip to Step 4 and create the PR without a Why Log section.
 
 ### Step 3: Build Decision Summary
 
 For each decision log file found:
-1. Read the file contents
+1. Read the file contents from the local filesystem
 2. Extract the title (first `# ` heading)
-3. Extract the `## Decision` section (all text between `## Decision` and the next `##` heading)
-4. Format as a compact bullet point with link:
+3. Extract key sections: `## Decision`, `## Alternatives Considered`, `## Reasoning`, `## Trade-offs Accepted`
+4. Format as inline content (since files may not be committed to the repo):
+   ```markdown
+   ### [Decision Title]
+   **Decision:** [Content from ## Decision section]
+   **Alternatives:** [Summary from ## Alternatives Considered — each alternative name with key pros/cons]
+   **Reasoning:** [Content from ## Reasoning section]
+   **Trade-offs:** [Content from ## Trade-offs Accepted section]
    ```
-   - **[Title]**: [Decision summary, trimmed to one line]
-     → [`docs/decisions/YYYY-MM-DD-<topic>.md`](docs/decisions/YYYY-MM-DD-<topic>.md)
-   ```
+
+Separate multiple decisions with `---`.
+
+### Step 3.5: Generate Mermaid Diagram
+
+Based on the decision logs collected, generate a mermaid diagram and append it to the Why Log section:
+
+- **1 decision with 2+ alternatives** → Alternatives Comparison (`flowchart LR`): show chosen option with ✅ and rejected options with ❌
+- **2+ sequential/dependent decisions** → Decision Flow (`flowchart TD`): show decision chain with chosen/rejected paths
+- **3+ independent decisions across phases** → Decision Timeline (`timeline`): group by Planning/Implementation phases
+
+Place the diagram at the end of the `## Why Log` section, after all textual summaries.
 
 ### Step 4: Push and Create PR
 
@@ -61,11 +79,18 @@ For each decision log file found:
    [Brief description of the changes in this PR, derived from commit messages]
 
    ## Why Log
-   [For each decision found:]
-   - **[Decision Title]**: [1-line decision summary]
-     → [`docs/decisions/YYYY-MM-DD-<topic>.md`](docs/decisions/YYYY-MM-DD-<topic>.md)
 
-   > Full reasoning and alternatives in each linked decision log.
+   ### [Decision Title]
+   **Decision:** [Decision content]
+   **Alternatives:** [Alternatives summary]
+   **Reasoning:** [Reasoning content]
+   **Trade-offs:** [Trade-offs content]
+
+   ---
+
+   [More decisions if any...]
+
+   [MERMAID DIAGRAM — see Step 3.5]
 
    ## Test Plan
    - [ ] [Testing checklist items based on the changes]

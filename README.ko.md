@@ -67,17 +67,25 @@ Decision logged: docs/decisions/2026-03-30-auth-strategy-jwt.md
 - 트레이드오프 해소
 - 리팩토링 결정
 
-**3. 커밋** — AI가 코드와 함께 `docs/decisions/*.md`를 자동으로 스테이징합니다. 결정 로그와 코드가 같은 커밋에 포함됩니다.
+**3. 커밋** — 결정 로그는 자동 스테이징되지 않습니다. AI가 커밋 전에 `docs/decisions/*.md` 포함 여부를 물어봅니다. 코드베이스를 깔끔하게 유지하면서도 의사결정 근거를 보존할 수 있습니다.
 
-**4. PR 생성** — AI가 PR을 만들 때 브랜치의 결정 로그를 자동 수집하여 PR 본문에 **Why Log** 섹션을 포함합니다:
+**4. PR 생성** — AI가 PR을 만들 때 결정 로그를 자동 수집(커밋된 파일 + 로컬 파일)하여 PR 본문에 **Why Log** 섹션을 전체 내용과 mermaid 다이어그램으로 포함합니다:
 
 ```markdown
 ## Why Log
 
-- **인증 전략: JWT**: JWT 토큰 사용 — 무상태 서비스 간 인증, 공유 세션 저장소 불필요
-  → [`docs/decisions/2026-03-30-auth-strategy-jwt.md`](docs/decisions/2026-03-30-auth-strategy-jwt.md)
+### 인증 전략: JWT
+**Decision:** httpOnly 쿠키에 저장하는 JWT 토큰 방식을 사용합니다.
+**Alternatives:** 세션 기반 (단순하지만 공유 저장소 필요), OAuth2 (표준이지만 과도함)
+**Reasoning:** JWT는 공유 세션 저장소 없이 마이크로서비스 간 무상태 검증을 가능하게 합니다.
+**Trade-offs:** 토큰 무효화에 추가 인프라 필요 (MVP에는 수용 가능).
 
-> Full reasoning and alternatives in each linked decision log.
+```mermaid
+flowchart LR
+    D{인증 전략}
+    D -->|"✅ 선택"| A["JWT<br/>무상태, 서비스 간 인증"]
+    D -.->|"❌"| B["세션<br/>공유 저장소 필요"]
+    D -.->|"❌"| C["OAuth2<br/>내부용으로 과도함"]
 ```
 
 ### 수동 (백업용)
@@ -164,11 +172,12 @@ JWT는 공유 세션 저장소 없이 마이크로서비스 간 무상태 검증
    -> AI가 기존 결정 로그에 구현 변경 사항 추가
 
 6. 코드 커밋
-   -> AI가 실행: git add docs/decisions/*.md + 코드 파일
-   -> 결정 로그가 같은 커밋에 포함
+   -> AI가 질문: "결정 로그를 이 커밋에 포함할까요? (y/n)"
+   -> 선택: 코드와 함께 커밋하거나, 로컬에만 유지
 
 7. PR 생성
-   -> AI가 PR 본문에 Why Log 섹션 자동 포함
+   -> AI가 PR 본문에 Why Log 섹션 + mermaid 다이어그램 자동 포함
+   -> 결정 파일이 커밋되지 않아도 동작
    -> 리뷰어가 전체 의사결정 여정을 확인: 요청 → 계획 → 변경 → 결과
 ```
 
@@ -176,14 +185,6 @@ JWT는 공유 세션 저장소 없이 마이크로서비스 간 무상태 검증
 
 ### 세션 시작 리마인더
 플러그인과 함께 자동 설치됩니다. 세션 시작 시 기존 결정 로그 수와 함께 리마인더를 표시합니다.
-
-### Git Pre-commit Hook (선택사항)
-AI 없이 커밋할 때를 위한 선택적 백업:
-
-```bash
-cp hooks/pre-commit-stage-decisions .git/hooks/pre-commit
-chmod +x .git/hooks/pre-commit
-```
 
 ## 브레인스토밍과 뭐가 다른가?
 

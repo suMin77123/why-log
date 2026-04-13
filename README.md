@@ -69,17 +69,26 @@ Trigger signals:
 - Trade-off resolutions
 - Refactoring decisions
 
-**3. Commit** — The AI automatically stages `docs/decisions/*.md` alongside code changes. Decision logs ship in the same commit as the code they document.
+**3. Commit** — Decision logs are NOT auto-staged. The AI asks you before including `docs/decisions/*.md` in a commit, so you can keep your codebase clean while still capturing reasoning.
 
-**4. PR Creation** — When the AI creates a PR, it automatically collects decision logs from the branch and includes a **Why Log** section in the PR body:
+**4. PR Creation** — When the AI creates a PR, it automatically collects decision logs (both committed and local) and includes a **Why Log** section in the PR body with full inline content and a mermaid diagram:
 
 ```markdown
 ## Why Log
 
-- **Auth Strategy: JWT**: Use JWT tokens — stateless cross-service auth, no shared session store
-  → [`docs/decisions/2026-03-30-auth-strategy-jwt.md`](docs/decisions/2026-03-30-auth-strategy-jwt.md)
+### Auth Strategy: JWT
+**Decision:** Use JWT tokens with httpOnly cookie storage.
+**Alternatives:** Session-based (simple but needs shared store), OAuth2 (standard but overkill)
+**Reasoning:** JWT allows stateless verification across microservices without shared session store.
+**Trade-offs:** Token revocation requires additional infrastructure (acceptable for MVP).
 
-> Full reasoning and alternatives in each linked decision log.
+```mermaid
+flowchart LR
+    D{Auth Strategy}
+    D -->|"✅ Chosen"| A["JWT<br/>stateless, cross-service"]
+    D -.->|"❌"| B["Sessions<br/>needs shared store"]
+    D -.->|"❌"| C["OAuth2<br/>overkill for internal"]
+```
 ```
 
 ### Manual (Backup)
@@ -167,11 +176,12 @@ The skill only logs decisions that meet ALL criteria:
    -> AI updates the existing decision log with implementation change
 
 6. Commit code
-   -> AI runs: git add docs/decisions/*.md + code files
-   -> Decision log included in same commit
+   -> AI asks: "Include decision logs in this commit? (y/n)"
+   -> Your choice: commit them with code, or keep them local
 
 7. Create PR
-   -> AI auto-includes Why Log section in PR body
+   -> AI auto-includes Why Log section with full decision content + mermaid diagram
+   -> Works even if decision files were not committed
    -> Reviewer sees the full decision journey: request → plan → changes → result
 ```
 
@@ -179,14 +189,6 @@ The skill only logs decisions that meet ALL criteria:
 
 ### Session Start Reminder
 Installed automatically with the plugin. Shows a reminder at session start with the count of existing decision logs.
-
-### Git Pre-commit Hook (Optional)
-An optional backup for non-AI commits:
-
-```bash
-cp hooks/pre-commit-stage-decisions .git/hooks/pre-commit
-chmod +x .git/hooks/pre-commit
-```
 
 ## How It Differs from Brainstorming
 
