@@ -341,7 +341,7 @@ for tmpl_section in "Context" "Decision" "Alternatives Considered" "Reasoning" "
 done
 
 # Mermaid section must have all 3 diagram types
-for diagram in "flowchart LR" "flowchart TD" "timeline"; do
+for diagram in "flowchart TD" "timeline"; do
   if grep -q "$diagram" "$SKILL"; then
     pass "Mermaid diagram type: $diagram"
   else

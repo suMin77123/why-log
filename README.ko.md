@@ -81,7 +81,7 @@ Decision logged: docs/decisions/2026-03-30-auth-strategy-jwt.md
 **Trade-offs:** 토큰 무효화에 추가 인프라 필요 (MVP에는 수용 가능).
 
 ```mermaid
-flowchart LR
+flowchart TD
     D{인증 전략}
     D -->|"✅ 선택"| A["JWT<br/>무상태, 서비스 간 인증"]
     D -.->|"❌"| B["세션<br/>공유 저장소 필요"]

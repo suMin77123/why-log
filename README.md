@@ -83,7 +83,7 @@ Trigger signals:
 **Trade-offs:** Token revocation requires additional infrastructure (acceptable for MVP).
 
 ```mermaid
-flowchart LR
+flowchart TD
     D{Auth Strategy}
     D -->|"✅ Chosen"| A["JWT<br/>stateless, cross-service"]
     D -.->|"❌"| B["Sessions<br/>needs shared store"]

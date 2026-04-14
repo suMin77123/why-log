@@ -79,6 +79,13 @@ When you CANNOT create `docs/decisions/*.md` files, write a `## Pending Decision
 ## Commit & PR Integration
 
 - **Commits:** A `PreToolUse` hook blocks `git commit` when unstaged decision logs exist in `docs/decisions/`. It also warns if `docs/decisions/` is in `.gitignore`. When blocked, ask the user: "Include decision logs in this commit? (y/n)". If yes: `git add docs/decisions/*.md` then commit. If no: prefix with `WHY_LOG_SKIP=1` (e.g., `WHY_LOG_SKIP=1 git commit -m "..."`).
+- **Subagent Commit Guard:** PreToolUse hooks do not propagate to subagents. If you are a subagent about to run `git commit`:
+  1. Check: `ls docs/decisions/*.md 2>/dev/null`
+  2. If files exist, check unstaged: `git ls-files --others --exclude-standard -- 'docs/decisions/*.md'` and `git diff --name-only -- docs/decisions/`
+  3. If unstaged logs found, you MUST ask the user: "Include these decision logs in the commit? (y/n)"
+     - If yes: `git add docs/decisions/*.md` then commit
+     - If no: prefix with `WHY_LOG_SKIP=1`
+  4. Do NOT skip this check. This replaces the PreToolUse hook that cannot run in subagents.
 - **PRs:** When creating a PR with `gh pr create`, automatically append a `## Why Log` section with full decision content and mermaid diagrams. Check both committed and local uncommitted decision files. Use the why-log skill for the full format, or `/why-pr` as manual fallback.
 
 ## Session Limit
