@@ -335,7 +335,7 @@ Use when a single key decision had multiple options:
 
 ````markdown
 ```mermaid
-flowchart LR
+flowchart TD
     D{Decision Title}
     D -->|"✅ Chosen"| A["Option A<br/>key advantage"]
     D -.->|"❌"| B["Option B<br/>key disadvantage"]

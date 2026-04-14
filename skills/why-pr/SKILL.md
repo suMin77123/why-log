@@ -58,7 +58,7 @@ Separate multiple decisions with `---`.
 
 Based on the decision logs collected, generate a mermaid diagram and append it to the Why Log section:
 
-- **1 decision with 2+ alternatives** → Alternatives Comparison (`flowchart LR`): show chosen option with ✅ and rejected options with ❌
+- **1 decision with 2+ alternatives** → Alternatives Comparison (`flowchart TD`): show chosen option with ✅ and rejected options with ❌
 - **2+ sequential/dependent decisions** → Decision Flow (`flowchart TD`): show decision chain with chosen/rejected paths
 - **3+ independent decisions across phases** → Decision Timeline (`timeline`): group by Planning/Implementation phases
 
