@@ -46,10 +46,14 @@ For each decision log file found:
 4. Format as inline content (since files may not be committed to the repo):
    ```markdown
    ### [Decision Title]
-   **Decision:** [Content from ## Decision section]
-   **Alternatives:** [Summary from ## Alternatives Considered — each alternative name with key pros/cons]
-   **Reasoning:** [Content from ## Reasoning section]
-   **Trade-offs:** [Content from ## Trade-offs Accepted section]
+   * **Decision:** [Content from ## Decision section]
+   * **Alternatives:**
+     * [Alternative A] — [key pros/cons]
+     * [Alternative B] — [key pros/cons]
+   * **Reasoning:** [Content from ## Reasoning section]
+   * **Trade-offs:**
+     * [Trade-off 1]
+     * [Trade-off 2]
    ```
 
 Separate multiple decisions with `---`.
@@ -81,10 +85,14 @@ Place the diagram at the end of the `## Why Log` section, after all textual summ
    ## Why Log
 
    ### [Decision Title]
-   **Decision:** [Decision content]
-   **Alternatives:** [Alternatives summary]
-   **Reasoning:** [Reasoning content]
-   **Trade-offs:** [Trade-offs content]
+   * **Decision:** [Decision content]
+   * **Alternatives:**
+     * [Alternative A] — [key pros/cons]
+     * [Alternative B] — [key pros/cons]
+   * **Reasoning:** [Reasoning content]
+   * **Trade-offs:**
+     * [Trade-off 1]
+     * [Trade-off 2]
 
    ---
 
