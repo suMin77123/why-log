@@ -306,10 +306,14 @@ When creating a pull request with `gh pr create`, **automatically** include deci
    ## Why Log
 
    ### [Decision Title]
-   **Decision:** [Content from ## Decision section]
-   **Alternatives:** [Summary from ## Alternatives Considered — list each alternative name and its key pros/cons in one line each]
-   **Reasoning:** [Content from ## Reasoning section]
-   **Trade-offs:** [Content from ## Trade-offs Accepted section]
+   * **Decision:** [Content from ## Decision section]
+   * **Alternatives:**
+     * [Alternative A] — [key pros/cons]
+     * [Alternative B] — [key pros/cons]
+   * **Reasoning:** [Content from ## Reasoning section]
+   * **Trade-offs:**
+     * [Trade-off 1]
+     * [Trade-off 2]
 
    ---
 
