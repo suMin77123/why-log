@@ -4,7 +4,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
-## [1.4.1] - 2026-04-16
+## [1.5.0] - 2026-04-16
+
+### Added
+- **Auto PR Update** — When pushing commits to a branch with an existing PR, the Why Log section is automatically updated via `gh pr edit --body`, keeping decision logs current as work evolves
 
 ### Changed
 - **PR Why Log bullet formatting** — Decision, Alternatives, Reasoning, Trade-offs fields now use `*` bullet points with sub-bullets for multi-item fields (Alternatives, Trade-offs), improving readability in PR descriptions
@@ -83,7 +86,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 - Documentation in English and Korean
 - Smoke test suite with 9 test sections
 
-[1.4.1]: https://github.com/suMin77123/why-log/releases/tag/v1.4.1
+[1.5.0]: https://github.com/suMin77123/why-log/releases/tag/v1.5.0
 [1.4.0]: https://github.com/suMin77123/why-log/releases/tag/v1.4.0
 [1.3.0]: https://github.com/suMin77123/why-log/releases/tag/v1.3.0
 [1.2.0]: https://github.com/suMin77123/why-log/releases/tag/v1.2.0

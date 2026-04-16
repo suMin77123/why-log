@@ -138,3 +138,25 @@ Included [N] decision log(s) in the PR description.
 - Keep the PR title under 70 characters
 - The Why Log section goes between Summary and Test Plan for visibility
 - If `gh` CLI is not available or not authenticated, inform the user and provide the PR body text so they can create it manually
+
+## Updating an Existing PR
+
+If a PR already exists on the current branch and the user asks to update it (or new decision logs were added), update the Why Log section in the existing PR body instead of creating a new PR.
+
+1. **Get the existing PR:**
+   ```bash
+   gh pr view --json number,body --jq '{number, body}'
+   ```
+
+2. **Collect and format decision logs** using the same process as Step 2-3.
+
+3. **Replace the Why Log section in the PR body:**
+   - If `## Why Log` exists, replace everything from `## Why Log` up to the next `## ` heading or end of body
+   - If `## Why Log` does not exist, insert before `## Test Plan` (or append at end)
+
+4. **Update the PR:**
+   ```bash
+   gh pr edit <number> --body "<updated body>"
+   ```
+
+5. **Report:** `PR #<number> updated with [N] decision log(s).`

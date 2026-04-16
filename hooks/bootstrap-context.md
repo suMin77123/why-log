@@ -86,7 +86,8 @@ When you CANNOT create `docs/decisions/*.md` files, write a `## Pending Decision
      - If yes: `git add docs/decisions/*.md` then commit
      - If no: prefix with `WHY_LOG_SKIP=1`
   4. Do NOT skip this check. This replaces the PreToolUse hook that cannot run in subagents.
-- **PRs:** When creating a PR with `gh pr create`, automatically append a `## Why Log` section with full decision content and mermaid diagrams. Check both committed and local uncommitted decision files. Use the why-log skill for the full format, or `/why-pr` as manual fallback.
+- **PRs (create):** When creating a PR with `gh pr create`, automatically append a `## Why Log` section with full decision content and mermaid diagrams. Check both committed and local uncommitted decision files. Use the why-log skill for the full format, or `/why-pr` as manual fallback.
+- **PRs (update):** When pushing commits to a branch with an existing PR, automatically update the `## Why Log` section via `gh pr edit --body`. Replace the existing Why Log section (from `## Why Log` to the next `## ` heading) with freshly collected decision logs. Preserve all other PR body sections.
 
 ## Session Limit
 
