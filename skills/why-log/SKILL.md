@@ -329,6 +329,43 @@ When creating a pull request with `gh pr create`, **automatically** include deci
 
 This happens every time a PR is created, with no extra user action required.
 
+## Auto PR Update
+
+When pushing additional commits to a branch that **already has an open PR**, automatically update the Why Log section in the PR body. This ensures the Why Log stays current as decisions evolve.
+
+### When to trigger
+
+Update the PR body when **any** of these are true:
+- New decision logs were created since the PR was opened
+- Existing decision logs were modified
+- The user explicitly asks to update the PR
+
+### How to update
+
+1. **Check for an existing PR on the current branch:**
+   ```bash
+   gh pr view --json number,body --jq '{number, body}' 2>/dev/null
+   ```
+   If no PR exists, skip — the Why Log will be included when the PR is created.
+
+2. **Collect decision logs** using the same method as Auto PR Inclusion (committed + local, deduplicated).
+
+3. **Rebuild the `## Why Log` section** with the latest content, using the same bullet format and mermaid diagram rules.
+
+4. **Replace the section in the existing PR body:**
+   - If the body contains `## Why Log`, replace everything from `## Why Log` up to (but not including) the next `## ` heading or end of body
+   - If the body does not contain `## Why Log`, insert it before `## Test Plan` (or at the end if no Test Plan section exists)
+
+5. **Update the PR:**
+   ```bash
+   gh pr edit <number> --body "<updated body>"
+   ```
+
+### Important
+
+- Preserve all other sections of the PR body (Summary, Test Plan, etc.) — only replace the Why Log section
+- This is automatic: do not ask the user before updating the PR body with decision logs
+
 ## Mermaid Diagrams in PR Body
 
 When building the `## Why Log` section for a PR, **always append a mermaid diagram** at the end, after all textual decision summaries. Choose the most appropriate diagram type based on the decisions:
